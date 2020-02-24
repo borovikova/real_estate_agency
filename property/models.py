@@ -2,10 +2,10 @@ from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
 
+from phonenumber_field.modelfields import PhoneNumberField
+
 
 class Flat(models.Model):
-    owner = models.CharField("ФИО владельца", max_length=200)
-    owners_phonenumber = models.CharField("Номер владельца", max_length=20)
     created_at = models.DateTimeField("Когда создано объявление",
                                       default=timezone.now, db_index=True)
 
@@ -29,7 +29,7 @@ class Flat(models.Model):
         "Год постройки здания", null=True, blank=True, db_index=True)
     new_building = models.NullBooleanField()
     liked_by = models.ManyToManyField(
-        User, related_name="liked_posts", verbose_name="Кто лайкнул")
+        User, related_name="liked_posts", blank=True, verbose_name="Кто лайкнул")
 
     def __str__(self):
         return f"{self.town}, {self.address} ({self.price}р.)"
@@ -43,3 +43,14 @@ class Complaint(models.Model):
 
     def __str__(self):
         return f"Жалоба от {self.user} на квартиру по адресу {self.flat.address} ({self.flat.town})"
+
+
+class Owner(models.Model):
+    name = models.CharField("ФИО владельца", max_length=200, db_index=True)
+    owners_phonenumber = models.CharField("Номер владельца", max_length=20)
+    owner_phone_pure = PhoneNumberField("Нормализованный номер владельца", blank=True, null=True)
+    flats = models.ManyToManyField(
+        "Flat", related_name="owners", verbose_name="Квартиры в собственности")
+
+    def __str__(self):
+        return f"{self.name}"
