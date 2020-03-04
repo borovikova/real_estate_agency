@@ -27,7 +27,7 @@ class Flat(models.Model):
     active = models.BooleanField("Активно-ли объявление", db_index=True)
     construction_year = models.IntegerField(
         "Год постройки здания", null=True, blank=True, db_index=True)
-    new_building = models.NullBooleanField()
+    new_building = models.NullBooleanField(verbose_name="Новостройка", db_index=True)
     liked_by = models.ManyToManyField(
         User, related_name="liked_posts", blank=True, verbose_name="Кто лайкнул")
 
@@ -36,9 +36,10 @@ class Flat(models.Model):
 
 
 class Complaint(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Кто жаловался")
+    user = models.ForeignKey(User, on_delete=models.CASCADE,
+                             verbose_name="Кто жаловался", related_name="сomplainants")
     flat = models.ForeignKey(Flat, on_delete=models.CASCADE,
-                             verbose_name="Квартира, на которую пожаловались")
+                             verbose_name="Квартира, на которую пожаловались", related_name="flats_with_complaints")
     text = models.TextField("Текст жалобы")
 
     def __str__(self):
